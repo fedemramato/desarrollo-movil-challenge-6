@@ -1,6 +1,6 @@
 import { AuthSession } from 'expo'
 
-const SPOTIFY_CLIENT_ID = 'bb223824c29844c7999ac5bc0ab7fdff'
+const SPOTIFY_CLIENT_ID = '8c8eeffb635f4b62af4c3aacfbbcfd10'
 const SECURE_STORE_ACCESS_TOKEN_KEY = 'spotifyAccessToken'
 
 let token
@@ -9,8 +9,12 @@ Expo.SecureStore.getItemAsync(SECURE_STORE_ACCESS_TOKEN_KEY).then(accessToken =>
   token = accessToken
 })
 
+export const isLogin = () => {
+  return false
+  //return token !== null && token !== undefined
+}
+
 export const authorize = () => {
-  console.warn('AUTH!')
   const redirectUrl = AuthSession.getRedirectUrl()
 
   return AuthSession.startAsync({
@@ -45,7 +49,6 @@ export const getUserArtistsPromise = () => {
   })
     .then(response => response.json())
     .then(result => {
-      console.warn('resultado', result)
       if (result.error && [401, 403].includes(result.error.status)) {
         throw new Error('Authorization error')
       }
@@ -65,7 +68,7 @@ export const getUserArtistsPromise = () => {
 export const getUserArtistsAsync = async accessToken => {
   const response = await fetch('https://api.spotify.com/v1/me/following?type=artist', {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${token}`,
     },
   })
   const result = await response.json()
@@ -81,4 +84,28 @@ export const getUserArtistsAsync = async accessToken => {
   }))
 
   return artistas
+}
+
+export const getUserPlaylists = async () => {
+  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  const result = await response.json()
+
+  if (result.error && [401, 403].includes(result.error.status)) {
+    throw new Error('Authorization error')
+  }
+
+  const playlists = result.items.map(item => {
+    const payload = {
+      name: item.name,
+      image: item.images[0].url,
+      tracks: item.tracks.total,
+    }
+    return payload
+  })
+
+  return playlists
 }

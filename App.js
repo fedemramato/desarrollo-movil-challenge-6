@@ -3,8 +3,41 @@ import { Button, StyleSheet, Text, View } from 'react-native'
 import { authorize, getUserArtistsPromise } from './spotify-api-client'
 import ArtistaFavorito from './ArtistaFavorito'
 import { ScrollView } from './node_modules/react-native-gesture-handler'
+import { createSwitchNavigator, createBottomTabNavigator, createStackNavigator } from 'react-navigation'
+import SignInScreen from './SignIn'
+import FavoritesScreen from './Favorites'
+import AuthLoadingScreen from './AuthLoading'
+import PlaylistsScreen from './Playlists'
 
-export default class App extends React.Component {
+const AuthStack = createStackNavigator({
+  signIn: {
+    screen: SignInScreen,
+  },
+})
+const AppStack = createBottomTabNavigator({
+  favorites: {
+    screen: FavoritesScreen,
+  },
+  playlists: {
+    screen: PlaylistsScreen,
+  },
+})
+
+export default createSwitchNavigator(
+  {
+    AuthLoading: AuthLoadingScreen,
+    App: AppStack,
+    Auth: AuthStack,
+  },
+  {
+    initialRouteName: 'AuthLoading',
+  }
+)
+
+/*export default class App extends React.Component {
+
+  
+
   state = {
     result: null,
     loggedIn: false,
@@ -21,7 +54,6 @@ export default class App extends React.Component {
 
   _handleAuthButtonPress = () => {
     authorize().then(loggedIn => {
-      console.warn('esta logueado?', loggedIn)
       this.setState({ loggedIn })
     })
   }
@@ -62,8 +94,6 @@ export default class App extends React.Component {
 
   render() {
     const { loggedIn, artistas } = this.state
-
-    console.warn('artistas', artistas)
 
     return (
       <View style={styles.container}>
@@ -110,4 +140,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
   },
-})
+})*/
